@@ -4,6 +4,7 @@ import { detectFormat, labelTypeSource } from '../lib/format-detector'
 import { uploadForOcr, deleteOcrFile } from '../lib/ocr-storage'
 import { extractPdfText } from '../lib/pdf-extractor'
 import { extractWordText } from '../lib/word-extractor'
+import { generateDocx } from '../lib/docx-generator'
 import { supabase } from '../lib/supabase'
 
 interface PipelineResult {
@@ -212,10 +213,18 @@ export function usePipeline(): UsePipelineReturn {
           })
         }
 
-        // ── Étape 6 : Génération DOCX (simulation) ─────────────────────────
-        updateStep('docx', { status: 'running' })
-        await new Promise(r => setTimeout(r, 400))
-        updateStep('docx', { status: 'done', detail: 'Document Word accessible généré' })
+        // ── Étape 6 : Génération DOCX réelle ──────────────────────────────
+        updateStep('docx', { status: 'running', detail: 'Génération du fichier Word…' })
+        let docxUrl = '#'
+        if (structuredDoc) {
+          docxUrl = await generateDocx(structuredDoc, selectedAUs)
+          updateStep('docx', { status: 'done', detail: 'Fichier .docx prêt au téléchargement' })
+        } else {
+          updateStep('docx', {
+            status: 'warning',
+            detail: 'Document structuré absent — téléchargement non disponible',
+          })
+        }
 
         // ── Rapport de fidélité ────────────────────────────────────────────
         const ausAppliques = structuredDoc?.aus_appliques?.length
@@ -249,7 +258,7 @@ export function usePipeline(): UsePipelineReturn {
           ? generateHtmlFromStructured(structuredDoc, selectedAUs)
           : generateHtmlPreview(file.name, extractedText, selectedAUs)
 
-        setResult({ htmlPreview, fidelityReport, docxUrl: '#' })
+        setResult({ htmlPreview, fidelityReport, docxUrl })
 
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Erreur inattendue lors du traitement'
