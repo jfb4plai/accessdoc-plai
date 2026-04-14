@@ -5,6 +5,7 @@ import { uploadForOcr, deleteOcrFile } from '../lib/ocr-storage'
 import { extractPdfText } from '../lib/pdf-extractor'
 import { extractWordText } from '../lib/word-extractor'
 import { generateDocx } from '../lib/docx-generator'
+import { saveDocument } from '../lib/document-saver'
 import { supabase } from '../lib/supabase'
 
 interface PipelineResult {
@@ -64,7 +65,8 @@ export function usePipeline(): UsePipelineReturn {
   )
 
   const startProcessing = useCallback(
-    async (file: File, _profile: TeacherProfile, selectedAUs: string[]) => {
+    async (file: File, profile: TeacherProfile, selectedAUs: string[]) => {
+      const _profile = profile
       setIsProcessing(true)
       setError(null)
       setResult(null)
@@ -213,12 +215,40 @@ export function usePipeline(): UsePipelineReturn {
           })
         }
 
-        // ── Étape 6 : Génération DOCX réelle ──────────────────────────────
+        // ── Étape 6 : Génération DOCX + sauvegarde ────────────────────────
         updateStep('docx', { status: 'running', detail: 'Génération du fichier Word…' })
         let docxUrl = '#'
         if (structuredDoc) {
           docxUrl = await generateDocx(structuredDoc, selectedAUs)
-          updateStep('docx', { status: 'done', detail: 'Fichier .docx prêt au téléchargement' })
+
+          // Sauvegarde en base + Storage (non-bloquant sur erreur)
+          try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+              const blob = await fetch(docxUrl).then(r => r.blob())
+              await saveDocument({
+                userId: user.id,
+                profileId: _profile?.id !== 'temp' ? _profile?.id : undefined,
+                filename: file.name,
+                typeSource,
+                docxBlob: blob,
+                ausAppliques: selectedAUs,
+                ocrScore,
+                fidelityReport: {
+                  score_global: 0,        // sera recalculé plus bas
+                  aus_appliques: [],
+                  images: { total: 0, arasaac: 0, conservees: 0, supprimees: 0 },
+                  alertes_ocr: [],
+                  alertes_pedagogiques: [],
+                  suggestions: [],
+                },
+              })
+            }
+          } catch {
+            // Echec de sauvegarde non-bloquant
+          }
+
+          updateStep('docx', { status: 'done', detail: 'Fichier .docx prêt au téléchargement · sauvegardé 30 jours' })
         } else {
           updateStep('docx', {
             status: 'warning',
