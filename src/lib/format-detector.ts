@@ -42,15 +42,20 @@ export async function detectFormat(file: File): Promise<TypeSource> {
  */
 async function checkPdfHasText(file: File): Promise<boolean> {
   try {
-    // Lecture des 4 premiers Ko du fichier binaire
-    const slice = file.slice(0, 4096)
+    // Lecture des 50 premiers Ko du fichier binaire
+    // (les opérateurs texte peuvent apparaître au-delà des 4 premiers Ko)
+    const slice = file.slice(0, 51200)
     const buffer = await slice.arrayBuffer()
     const bytes = new Uint8Array(buffer)
-    const sample = String.fromCharCode(...bytes)
+    // Décode en ignorant les caractères non-ASCII pour éviter les erreurs
+    let sample = ''
+    for (let i = 0; i < bytes.length; i++) {
+      sample += bytes[i] < 128 ? String.fromCharCode(bytes[i]) : ' '
+    }
 
     // Les PDFs natifs contiennent des marqueurs texte comme "BT" (Begin Text)
     // et des opérateurs Tj / TJ / Tf
-    const hasTextMarkers = /BT[\s\S]{0,200}(Tj|TJ|Tf)/m.test(sample)
+    const hasTextMarkers = /BT[\s\S]{0,500}(Tj|TJ|Tf)/m.test(sample)
     return hasTextMarkers
   } catch {
     // En cas d'erreur de lecture, on suppose pdf_scan (plus prudent)

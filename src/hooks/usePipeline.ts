@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import type { ProcessingStep, FidelityReport, TeacherProfile, StructuredDocument } from '../types'
 import { detectFormat, labelTypeSource } from '../lib/format-detector'
 import { uploadForOcr, deleteOcrFile } from '../lib/ocr-storage'
-import { extractPdfText } from '../lib/pdf-extractor'
+import { extractPdfText, renderPdfPagesToBase64 } from '../lib/pdf-extractor'
 import { extractWordText } from '../lib/word-extractor'
 import { generateDocx } from '../lib/docx-generator'
 import { saveDocument } from '../lib/document-saver'
@@ -96,40 +96,34 @@ export function usePipeline(): UsePipelineReturn {
         let pageCount = 0
         let ocrScore = 99 // par défaut pour les fichiers natifs
 
+        // Vision : données image pour Claude (scan_gsm ou pdf_scan)
+        let visionImageUrl: string | null = null
+        let visionBase64Pages: string[] | null = null
+
         if (typeSource === 'scan_gsm' || typeSource === 'pdf_scan') {
-          // → Mistral OCR via serverless
+          // → Claude Vision (remplace Mistral OCR)
           const { data: { user } } = await supabase.auth.getUser()
           if (!user) throw new Error('Utilisateur non authentifié')
 
-          updateStep('ocr', { status: 'running', detail: 'Upload vers le serveur OCR…' })
-          tempFileUrl = await uploadForOcr(file, user.id)
+          updateStep('ocr', { status: 'running', detail: 'Préparation pour Claude Vision…' })
 
-          updateStep('ocr', { status: 'running', detail: 'Analyse OCR en cours (Mistral)…' })
-          const ocrRes = await fetch('/api/ocr', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fileUrl: tempFileUrl, fileType: file.type }),
-          })
-
-          if (!ocrRes.ok) {
-            const { error: errMsg } = await ocrRes.json()
-            throw new Error(errMsg ?? 'Erreur OCR')
+          if (typeSource === 'scan_gsm') {
+            // Image directe → URL publique Supabase → Claude Vision
+            tempFileUrl = await uploadForOcr(file, user.id)
+            visionImageUrl = tempFileUrl
+            pageCount = 1
+          } else {
+            // pdf_scan → rendre chaque page en JPEG base64 → Claude Vision
+            updateStep('ocr', { status: 'running', detail: 'Conversion des pages en images…' })
+            visionBase64Pages = await renderPdfPagesToBase64(file)
+            pageCount = visionBase64Pages.length
+            tempFileUrl = await uploadForOcr(file, user.id) // pour nettoyage
           }
 
-          const ocrData = await ocrRes.json() as {
-            totalText: string
-            pageCount: number
-          }
-          extractedText = ocrData.totalText
-          pageCount = ocrData.pageCount
-
-          // Estime un score de qualité simple basé sur la densité de texte
-          const wordsExtracted = extractedText.split(/\s+/).filter(Boolean).length
-          ocrScore = wordsExtracted > 50 ? 92 : wordsExtracted > 20 ? 78 : 60
-
+          ocrScore = 95 // Claude Vision : qualité élevée
           updateStep('ocr', {
-            status: ocrScore < 80 ? 'warning' : 'done',
-            detail: `${pageCount} page(s) · ${wordsExtracted} mots extraits · Score qualité : ${ocrScore}%`,
+            status: 'done',
+            detail: `${pageCount} page(s) · Prêt pour Claude Vision`,
           })
 
         } else if (typeSource === 'pdf_natif') {
@@ -179,19 +173,29 @@ export function usePipeline(): UsePipelineReturn {
 
         let structuredDoc: StructuredDocument | null = null
 
-        if (extractedText && extractedText.length > 20 && selectedAUs.length > 0) {
+        const hasContent = extractedText.length > 20 || visionImageUrl || visionBase64Pages
+        if (hasContent && selectedAUs.length > 0) {
+          const analyzeBody: Record<string, unknown> = {
+            selectedAUs,
+            profile: _profile ? {
+              niveau: _profile.niveau,
+              forme: _profile.forme,
+              cours: _profile.cours,
+            } : undefined,
+          }
+          // Mode Vision ou mode texte
+          if (visionImageUrl) {
+            analyzeBody.visionImageUrl = visionImageUrl
+          } else if (visionBase64Pages) {
+            analyzeBody.visionBase64Pages = visionBase64Pages
+          } else {
+            analyzeBody.extractedText = extractedText
+          }
+
           const analyzeRes = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              extractedText,
-              selectedAUs,
-              profile: _profile ? {
-                niveau: _profile.niveau,
-                forme: _profile.forme,
-                cours: _profile.cours,
-              } : undefined,
-            }),
+            body: JSON.stringify(analyzeBody),
           })
 
           if (analyzeRes.ok) {

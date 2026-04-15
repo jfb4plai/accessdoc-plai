@@ -32,3 +32,35 @@ export async function extractPdfText(
     pageCount: pdf.numPages,
   }
 }
+
+/**
+ * Rend les pages d'un PDF en images JPEG base64 (pour Claude Vision).
+ * Utilisé pour les PDFs scannés (ex. Microsoft Lens).
+ */
+export async function renderPdfPagesToBase64(
+  file: File,
+  maxPages = 6
+): Promise<string[]> {
+  const arrayBuffer = await file.arrayBuffer()
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+  const pageCount = Math.min(pdf.numPages, maxPages)
+  const base64Pages: string[] = []
+
+  for (let i = 1; i <= pageCount; i++) {
+    const page = await pdf.getPage(i)
+    const viewport = page.getViewport({ scale: 2.0 })
+
+    const canvas = document.createElement('canvas')
+    canvas.width = viewport.width
+    canvas.height = viewport.height
+
+    const ctx = canvas.getContext('2d')!
+    await page.render({ canvasContext: ctx, viewport }).promise
+
+    // Extrait le base64 JPEG (sans le préfixe data:image/jpeg;base64,)
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+    base64Pages.push(dataUrl.split(',')[1])
+  }
+
+  return base64Pages
+}
