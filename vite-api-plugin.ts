@@ -87,6 +87,14 @@ RÔLE :
 - En cas d'ambiguïté de lecture, préfère le mot du champ lexical du document à une transcription littérale improbable
 - Exemple : thème "animaux de la ferme" + forme visuelle ambiguë → choisis le mot d'animal le plus proche visuellement
 
+CONTRÔLE SPÉCIFIQUE — EXERCICES DE PHONOLOGIE (sons du français) :
+- Si le document est un exercice sur des sons/graphèmes, les sons listés dans le titre DOIVENT former une famille phonologique cohérente
+- Familles valides en français : "eu / oeu / eur / oeur", "an / en / am / em", "in / ain / ein", "oi / oin", "ou / on", "ill / ail / eil / euil / ouil", etc.
+- INVALIDE : "ou" et "oeu" dans la même série (pas de famille phonologique entre ces deux sons)
+- VALIDE : "eu" et "oeu" dans la même série (sons proches, graphèmes liés)
+- En cursive/scan : le "e" manuscrit ressemble visuellement à un "o" → vérifier la cohérence phonologique avant de valider
+- Si tu lis une série de sons incohérente, corrige en priorité le son qui rompt la cohérence de la famille
+
 RÈGLE FONDAMENTALE — CONSERVATION DU CONTENU :
 - Inclus TOUT le contenu du document : consignes, listes de mots, phrases à compléter, exercices de choix, grilles, etc.
 - Si l'OCR est dégradé (écriture cursive ou manuscrite), conserve quand même TOUS les éléments visibles.
