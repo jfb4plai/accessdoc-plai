@@ -144,7 +144,7 @@ export default function ProfileEditor() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <img src="/plai-logo.svg" alt="PLAI" className="h-7 w-auto brightness-0 invert" />
+          <img src="/plai-logo.jpg" alt="PLAI" className="h-9 w-auto rounded" />
           <h1 className="text-lg font-bold">
             {isEdit ? 'Modifier le profil' : 'Nouveau profil enseignant'}
           </h1>

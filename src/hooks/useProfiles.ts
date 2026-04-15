@@ -55,15 +55,24 @@ export function useProfiles(): UseProfilesReturn {
           .eq('is_default', true)
       }
 
-      const { data: created, error: supaErr } = await supabase
+      const { error: supaErr } = await supabase
         .from('teacher_profiles')
         .insert({ ...data, user_id: user.id })
-        .select()
-        .single()
 
       if (supaErr) throw supaErr
+
+      // Récupère le profil créé séparément pour éviter le 409 RLS
+      const { data: newProfile } = await supabase
+        .from('teacher_profiles')
+        .select()
+        .eq('user_id', user.id)
+        .eq('nom_profil', data.nom_profil)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
       await fetchProfiles()
-      return created as TeacherProfile
+      return (newProfile as TeacherProfile) ?? null
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la création du profil')
       return null
