@@ -160,7 +160,6 @@ export default function DocumentHistory() {
                   <Clock className="w-3 h-3" />
                   {formatDate(doc.created_at)}
                 </span>
-                {/* @ts-ignore — expires_at n'est pas encore dans le type */}
                 <ExpiryBadge expiresAt={doc.expires_at} />
               </div>
             </div>

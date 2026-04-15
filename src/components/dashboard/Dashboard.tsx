@@ -44,7 +44,7 @@ export default function Dashboard() {
       <header className="bg-blue-900 text-white shadow-md">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/plai-logo.svg" alt="PLAI" className="h-8 w-auto brightness-0 invert" />
+            <img src="/plai-logo.jpg" alt="PLAI" className="h-10 w-auto rounded" />
             <span className="font-bold text-lg">AccessDoc PLAI</span>
           </div>
 

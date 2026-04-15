@@ -65,6 +65,7 @@ export interface Document {
   url_document_accessible: string | null
   statut: 'en_cours' | 'termine' | 'erreur'
   created_at: string
+  expires_at?: string
 }
 
 // Étape de traitement dans le pipeline
