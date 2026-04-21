@@ -101,6 +101,7 @@ RÈGLE FONDAMENTALE — CONSERVATION DU CONTENU :
 - Ne filtre JAMAIS le contenu par manque de confiance dans l'OCR — inclus même les mots partiellement lisibles.
 - Pour chaque exercice numéroté, génère au minimum : 1 bloc consigne + les blocs de contenu qui suivent.
 - Les listes de mots (banque de mots) → type "liste", items = chaque mot.
+- Les listes d'items numérotés : UN SEUL bloc "liste" par exercice, numérotation CONTINUE de 1 à N même si le document original utilise des sous-groupes (ex: 1-4, 1-4, 1-4 → convertir en 1 à 12). Jamais recommencer à 1 au milieu d'un même exercice.
 - Les phrases à trous → type "exercice", texte = la phrase avec "______" pour les blancs.
 - Les choix entre parenthèses (mot1 - mot2) → type "exercice", texte = la phrase complète avec les options.
 - Les lignes de réponse vides → type "espace_reponse".
