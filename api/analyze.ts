@@ -1,6 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Anthropic from '@anthropic-ai/sdk'
 
+// Vercel Hobby = 10s max, Pro = 300s. Claude Vision sur 2 pages dépasse 10s.
+export const maxDuration = 60
+
 const SYSTEM_PROMPT = `Tu es un expert en accessibilité pédagogique pour la Fédération Wallonie-Bruxelles (FWB).
 Tu reçois un document scolaire extrait (parfois par OCR de qualité variable) et une liste d'Aménagements Universels (AUs) à appliquer.
 

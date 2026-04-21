@@ -207,9 +207,11 @@ export function usePipeline(): UsePipelineReturn {
             })
           } else {
             // Non-bloquant : on continue avec aperçu simplifié
+            const errText = await analyzeRes.text().catch(() => analyzeRes.status.toString())
+            console.error('[analyze] HTTP', analyzeRes.status, errText)
             updateStep('aus', {
               status: 'warning',
-              detail: 'Analyse Claude indisponible — AUs typographiques appliqués',
+              detail: `Analyse Claude indisponible (HTTP ${analyzeRes.status}) — AUs typographiques appliqués`,
             })
           }
         } else {

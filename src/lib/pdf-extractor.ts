@@ -48,7 +48,7 @@ export async function renderPdfPagesToBase64(
 
   for (let i = 1; i <= pageCount; i++) {
     const page = await pdf.getPage(i)
-    const viewport = page.getViewport({ scale: 2.0 })
+    const viewport = page.getViewport({ scale: 1.5 })
 
     const canvas = document.createElement('canvas')
     canvas.width = viewport.width
@@ -58,7 +58,7 @@ export async function renderPdfPagesToBase64(
     await page.render({ canvasContext: ctx, viewport }).promise
 
     // Extrait le base64 JPEG (sans le préfixe data:image/jpeg;base64,)
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.75)
     base64Pages.push(dataUrl.split(',')[1])
   }
 
