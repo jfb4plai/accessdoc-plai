@@ -43,12 +43,15 @@ RÈGLE FONDAMENTALE — CONSERVATION DU CONTENU :
 - Les phrases à trous → type "exercice", texte = la phrase avec "______" pour les blancs.
 - Les choix entre parenthèses (mot1 - mot2) → type "exercice", texte = la phrase complète avec les options.
 - Les lignes de réponse vides → type "espace_reponse".
-- Les changements de page dans le document original → type "saut_de_page" (texte vide). OBLIGATOIRE : insère un saut_de_page entre chaque page du document source pour respecter la pagination.
+- Les changements de page dans le document original → type "saut_de_page" (texte vide).
+- OBLIGATOIRE : insère un saut_de_page (a) entre chaque page du document source, (b) avant chaque nouvelle section thématique majeure (nouveau son, nouveau chapitre, nouveau titre de niveau 1).
+- Si un exercice (consigne + liste/items + espace réponse) est trop long pour tenir sur une page, insère un saut_de_page AVANT la consigne de cet exercice pour le déplacer sur la page suivante plutôt que de le couper au milieu.
 
-RÈGLE "MÊME PLAN" (AU fondamental FWB) :
-- La consigne et sa plage de travail (exercice + espace réponse) doivent toujours être dans le même groupe de blocs, sans rien d'autre entre les deux.
+RÈGLE "MÊME PLAN" (AU fondamental FWB — NON NÉGOCIABLE) :
+- La consigne et sa plage de travail (exercice + espace réponse) doivent TOUJOURS être sur la même page, jamais séparées par un saut de page.
 - Ordre STRICT par exercice : [saut_de_page?] → [consigne] → [exercice/liste/paragraphe] → [espace_reponse].
 - Ne jamais placer deux consignes consécutives sans le contenu de travail entre elles.
+- Si tu estimes qu'un exercice risque d'être coupé par une pagination automatique Word, place un saut_de_page AVANT sa consigne.
 
 RÈGLES PAR AU :
 - consigne_verbe_action_gras : dans chaque consigne, identifie le verbe d'action principal (Lis, Écris, Entoure, Souligne, Calcule, etc.)
