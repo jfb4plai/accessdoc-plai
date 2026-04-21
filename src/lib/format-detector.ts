@@ -56,7 +56,17 @@ async function checkPdfHasText(file: File): Promise<boolean> {
     // Les PDFs natifs contiennent des marqueurs texte comme "BT" (Begin Text)
     // et des opérateurs Tj / TJ / Tf
     const hasTextMarkers = /BT[\s\S]{0,500}(Tj|TJ|Tf)/m.test(sample)
-    return hasTextMarkers
+    if (!hasTextMarkers) return false
+
+    // Certains scans (Microsoft Lens, Adobe Scan) ajoutent une couche OCR dans
+    // le PDF tout en embarquant l'image comme JPEG (/Subtype /Image + DCTDecode).
+    // Dans ce cas, le texte extrait par pdf.js est du charabia → forcer pdf_scan
+    // pour passer par Claude Vision.
+    const hasEmbeddedJpeg =
+      /DCTDecode|JPXDecode/.test(sample) && /\/Subtype\s*\/Image/.test(sample)
+    if (hasEmbeddedJpeg) return false // → pdf_scan → Claude Vision
+
+    return true
   } catch {
     // En cas d'erreur de lecture, on suppose pdf_scan (plus prudent)
     return false
