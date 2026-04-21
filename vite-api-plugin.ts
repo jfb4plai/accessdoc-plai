@@ -104,6 +104,12 @@ RÈGLE FONDAMENTALE — CONSERVATION DU CONTENU :
 - Les phrases à trous → type "exercice", texte = la phrase avec "______" pour les blancs.
 - Les choix entre parenthèses (mot1 - mot2) → type "exercice", texte = la phrase complète avec les options.
 - Les lignes de réponse vides → type "espace_reponse".
+- Les changements de page dans le document original → type "saut_de_page" (texte vide). OBLIGATOIRE : insère un saut_de_page entre chaque page du document source pour respecter la pagination.
+
+RÈGLE "MÊME PLAN" (AU fondamental FWB) :
+- La consigne et sa plage de travail (exercice + espace réponse) doivent toujours être dans le même groupe de blocs, sans rien d'autre entre les deux.
+- Ordre STRICT par exercice : [saut_de_page?] → [consigne] → [exercice/liste/paragraphe] → [espace_reponse].
+- Ne jamais placer deux consignes consécutives sans le contenu de travail entre elles.
 
 RÈGLES PAR AU :
 - consigne_verbe_action_gras : identifie le verbe d'action principal de chaque consigne (champ "verbeAction")
@@ -122,7 +128,7 @@ FORMAT JSON :
   "titre": "string",
   "blocs": [
     {
-      "type": "titre"|"consigne"|"paragraphe"|"liste"|"exercice"|"espace_reponse",
+      "type": "titre"|"consigne"|"paragraphe"|"liste"|"exercice"|"espace_reponse"|"saut_de_page",
       "texte": "string",
       "niveau": 1|2|3,
       "items": ["string"],

@@ -1,5 +1,5 @@
 import {
-  Document, Packer, Paragraph, TextRun,
+  Document, Packer, Paragraph, TextRun, PageBreak,
   AlignmentType, BorderStyle, HeadingLevel,
   Footer, PageNumber, convertInchesToTwip,
   ShadingType,
@@ -86,6 +86,8 @@ function blocConsigne(bloc: DocBloc, aus: string[]): Paragraph {
 
   return new Paragraph({
     ...paraProps(aus),
+    // "Même plan" AU : la consigne reste toujours sur la même page que ce qui suit
+    keepNext: true,
     spacing: { line: LINE_SPACING, before: 80, after: 80 },
     border: {
       left: {
@@ -134,6 +136,9 @@ function blocExercice(bloc: DocBloc, aus: string[]): Paragraph {
 
   return new Paragraph({
     ...paraProps(aus),
+    // "Même plan" : garde les lignes de l'exercice ensemble + reste avec l'espace réponse
+    keepLines: true,
+    keepNext: true,
     spacing: { line: LINE_SPACING, before: 240, after: 100 },
     children: [
       ...(label
@@ -146,9 +151,11 @@ function blocExercice(bloc: DocBloc, aus: string[]): Paragraph {
 
 function blocEspaceReponse(): Paragraph[] {
   // 3 lignes de tirets pour l'espace réponse
+  // keepLines : les 3 lignes restent ensemble sur la même page
   return Array.from({ length: 3 }, () =>
     new Paragraph({
       spacing: { line: LINE_SPACING, after: 0 },
+      keepLines: true,
       children: [
         new TextRun({
           text: '_'.repeat(60),
@@ -189,6 +196,13 @@ function buildChildren(doc: StructuredDocument, aus: string[]): Paragraph[] {
         break
       case 'espace_reponse':
         children.push(...blocEspaceReponse())
+        break
+      case 'saut_de_page':
+        // Respecte la pagination du document original
+        children.push(new Paragraph({
+          spacing: { line: 240, before: 0, after: 0 },
+          children: [new PageBreak()],
+        }))
         break
       default:
         children.push(blocParagraphe(bloc, aus))

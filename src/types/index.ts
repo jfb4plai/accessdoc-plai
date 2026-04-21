@@ -110,7 +110,7 @@ export interface FidelityReport {
 
 // Bloc de contenu dans un document structuré
 export interface DocBloc {
-  type: 'titre' | 'consigne' | 'paragraphe' | 'liste' | 'exercice' | 'espace_reponse'
+  type: 'titre' | 'consigne' | 'paragraphe' | 'liste' | 'exercice' | 'espace_reponse' | 'saut_de_page'
   texte?: string
   niveau?: 1 | 2 | 3
   items?: string[]
